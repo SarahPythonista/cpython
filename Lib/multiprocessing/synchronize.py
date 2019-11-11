@@ -50,6 +50,9 @@ class SemLock(object):
     def __init__(self, kind, value, maxvalue, *, ctx):
         if ctx is None:
             ctx = context._default_context.get_context()
+        if maxvalue > SEM_VALUE_MAX:
+            raise ValueError('Specified semaphore size'
+                             ' exceeds system maximum')
         name = ctx.get_start_method()
         unlink_now = sys.platform == 'win32' or name == 'fork'
         for i in range(100):
