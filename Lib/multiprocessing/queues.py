@@ -45,7 +45,14 @@ class Queue(object):
             self._wlock = None
         else:
             self._wlock = ctx.Lock()
-        self._sem = ctx.BoundedSemaphore(maxsize)
+        try:
+            self._sem = ctx.BoundedSemaphore(maxsize)
+        except (OSError, OverflowError) as e:
+            from .synchronize import SEM_VALUE_MAX
+            if maxsize > SEM_VALUE_MAX:
+                raise ValueError('Queue size exceeds maximum') from None
+            else:
+                raise e
         # For use by concurrent.futures
         self._ignore_epipe = False
 
